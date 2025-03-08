@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Categories</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 1000px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Card-specific styles */
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .category-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 200px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .category-card h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #5cb85c;
+        }
+
+        .category-card p {
+            margin: 10px 0 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Select a Category</h2>
+        <div id="categories" class="card-container"></div>
+        <button id="logout">Logout</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+
+            // Load Categories as Cards
+            const categoriesDiv = document.getElementById('categories');
+            if (categoriesDiv && token) {
+                fetch('/categories', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.categories) {
+                        data.categories.forEach(category => {
+                            const card = document.createElement('div');
+                            card.className = 'category-card';
+                            // Split category into title and provider for display
+                            const [title, providerPart] = category.split(' provided by ');
+                            card.innerHTML = `
+                                <h3>${title}</h3>
+                                <p>Provided by ${providerPart}</p>
+                            `;
+                            card.onclick = () => window.location.href = `/category-details/${category}`;
+                            categoriesDiv.appendChild(card);
+                        });
+                    } else {
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                });
+            } else if (categoriesDiv) {
+                window.location.href = '/login';
+            }
+
+            // Logout
+            const logoutButton = document.getElementById('logout');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

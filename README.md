@@ -1,2 +1,1 @@
-# https-github.com-bhaskar-skill_share
-skill share discription
+# skill_share

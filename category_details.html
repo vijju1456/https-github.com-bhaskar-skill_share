@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Details - {{ category }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #5cb85c;
+            margin-top: 20px;
+        }
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+        .blog {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .blog:last-child {
+            border-bottom: none;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        #message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title"></h1>
+        <p id="description"></p>
+        <h2>Overview</h2>
+        <p id="texts"></p>
+        <h2>Blogs</h2>
+        <div id="blogs"></div>
+        <button onclick="goBack()">Back to Categories</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const category = "{{ category }}";
+        const token = localStorage.getItem('token');
+
+        // Fetch category data
+        if (token) {
+            fetch(`/category/${category}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('message').textContent = data.message;
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                    }
+                } else {
+                    document.getElementById('title').textContent = data.title;
+                    document.getElementById('description').textContent = data.description;
+                    document.getElementById('texts').textContent = data.texts;
+                    const blogsDiv = document.getElementById('blogs');
+                    data.blogs.forEach(blog => {
+                        const blogDiv = document.createElement('div');
+                        blogDiv.className = 'blog';
+                        blogDiv.innerHTML = `<strong>${blog.title}</strong><p>${blog.content}</p>`;
+                        blogsDiv.appendChild(blogDiv);
+                    });
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Error loading category data.';
+                console.error(error);
+            });
+        } else {
+            window.location.href = '/login';
+        }
+
+        // Go back to categories
+        function goBack() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
